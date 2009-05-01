@@ -5,6 +5,7 @@ require 'rubygems/installer'
 require 'net/ftp'
 require 'net/http'
 
+
 module Crate
   #
   # Utiltiy methods useful for many items
@@ -79,8 +80,9 @@ module Crate
     #
     def download_via_http( uri, to, limit = 10 )
       uri = URI.parse( uri ) unless URI === uri
+      proxy = ENV['CRATE_HTTP_PROXY'] ? URI.parse(ENV['CRATE_HTTP_PROXY']) : OpenStruct.new
       raise ::Crate::Error, "Reached HTTP Redirect limit with #{uri.to_s}" if limit == 0
-      Net::HTTP.start( uri.host, uri.port ) do |http|
+      Net::HTTP.start( uri.host, uri.port, proxy.host, proxy.port, proxy.user, proxy.password ) do |http|
         http.request_get( uri.request_uri ) do |response|
           case response
           when Net::HTTPSuccess then
